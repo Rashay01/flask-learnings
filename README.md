@@ -19,3 +19,4 @@ in cmd:
 ### Create Repo in Github
 1. Stage files --> `git add .`
 2. Commit --> `git commit -m "message" .`
+3. Push Github
