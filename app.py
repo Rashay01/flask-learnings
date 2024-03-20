@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 
@@ -94,6 +94,29 @@ movies = [
     },
 ]
 
+# jinja2 - templates
+users = [
+    {
+        "name": "Dhara",
+        "img": "https://i.pinimg.com/236x/db/b9/cb/dbb9cbe3b84da22c294f57cc7847977e.jpg",
+        "pro": True,
+    },
+    {
+        "name": "Arjun",
+        "img": "https://images.unsplash.com/photo-1618641986557-1ecd230959aa?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
+        "pro": False,
+    },
+    {
+        "name": "John",
+        "img": "https://imgv3.fotor.com/images/blog-richtext-image/10-profile-picture-ideas-to-make-you-stand-out.jpg",
+        "pro": True,
+    },
+]
+
+
+name = "Caleb"
+hobbies = ["Gaming", "Reading", "Soccer", "Ballet", "Gyming"]
+
 
 @app.route("/")
 def hello_world():
@@ -102,7 +125,17 @@ def hello_world():
 
 @app.route("/about")
 def about():
-    return "<h1>About Page</h1>"
+    return render_template("about.html", about_items=users)
+
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html", movies=movies)
+
+
+@app.route("/profile")
+def profile():
+    return render_template("profile.html", name=name, hobbies=hobbies)
 
 
 # /movies --> JSON
@@ -183,3 +216,27 @@ def delete_movie(id):
 #         return {"message": "Movie Not found"}, 404
 #     movies = [movie for movie in movies if movie["id"] != id]
 #     return jsonify(filtered_movie)
+
+
+# @app.put("/movies/<id>")
+# def update_movies(id):
+#     movie_update = request.json
+#     filtered_movie = next(
+#         (ind for ind in range(len(movies)) if movies[ind]["id"] == id), None
+#     )
+#     if filtered_movie is None:
+#         return {"message": "Movie Not found"}, 404
+#     movies[filtered_movie].update(movie_update)
+#     result = {"message": "updated successfully", "data": movies[filtered_movie]}
+#     return jsonify(result)
+
+
+@app.put("/movies/<id>")
+def update_movies(id):
+    movie_update = request.json
+    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+    if filtered_movie is None:
+        return jsonify({"message": "Movie Not found"}), 404
+    filtered_movie.update(movie_update)
+    result = {"message": "updated successfully", "data": filtered_movie}
+    return jsonify(result)
