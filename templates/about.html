@@ -1,44 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <style>
-        body {
-            margin: 0;
-            display: grid;
-            place-content: center;
-            min-height: 100vh;
-        }
-        .profile_img{
-            height: 200px;
-            aspect-ratio: 1/ 1;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .heading{
-            font-weight: 700;
-            font-style: italic;
-        }
-        .hello{
-            font-family: sans-serif;
-            font-size: 28px;
-        }
-    </style>
-</head>
-<body>
-    {% for about_item in about_items %}
-    <div>
-        <img src = "{{ about_item.img }}"  class="profile_img"/>
-        {% if about_item['pro'] %}
-        <p class="hello"> Hello<span class="heading">, {{about_item['name']}} </span>🚀🚀</p>
-        {% else %}
-        <p class="hello"> Hello<span class="heading">, {{about_item['name']}} </span>🎉🎉</p>
-        {% endif %}
-    </div>
-    {% endfor %}
+{% extends 'base.html' %}
+{% block body%}
+
+
+{% for user in users %}
+<div>
+    <img src = "{{ user.img }}"  class="profile_img"/>
     <!-- mustache -->
-    
-</body>
-</html>
+    <p class="hello"> Hello, <span class="user-name">{{user['name']}} </span>
+        {{"🚀" if user.pro else "🎊🎊"}}
+    </p>
+</div>
+{% endfor %}
+
+{% endblock %}
+

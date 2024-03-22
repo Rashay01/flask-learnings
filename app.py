@@ -125,7 +125,7 @@ def hello_world():
 
 @app.route("/about")
 def about():
-    return render_template("about.html", about_items=users)
+    return render_template("about.html", users=users)
 
 
 @app.route("/dashboard")
