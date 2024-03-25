@@ -5,7 +5,7 @@
 {% for user in users %}
 <div>
     <img src = "{{ user.img }}"  class="profile_img"/>
-    <!-- mustache -->
+    <!-- mustache syntax-->
     <p class="hello"> Hello, <span class="user-name">{{user['name']}} </span>
         {{"🚀" if user.pro else "🎊🎊"}}
     </p>
