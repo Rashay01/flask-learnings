@@ -138,6 +138,19 @@ def profile():
     return render_template("profile.html", name=name, hobbies=hobbies)
 
 
+@app.route("/movie-list")
+def movie_list():
+    return render_template("movie-list.html", movies=movies)
+
+
+@app.route("/movie-list/<id>")
+def display_specific_movie(id):
+    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+    if filtered_movie is None:
+        return "<h1>404 Movie Not Found</h2>"
+    return render_template("movie-detail.html", movie=filtered_movie)
+
+
 # /movies --> JSON
 @app.get("/movies")
 def get_movies():
