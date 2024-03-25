@@ -61,3 +61,16 @@ flask --app hello run --debug
 
 runs on :
 http://localhost:5000/
+
+
+## Take Snapshot of all packages
+
+```sh
+pip freeze > requirements.txt
+```
+
+## Install all dependencies 
+
+```sh
+pip install -r requirements.txt
+```
