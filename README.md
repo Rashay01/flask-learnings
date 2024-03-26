@@ -74,3 +74,13 @@ pip freeze > requirements.txt
 ```sh
 pip install -r requirements.txt
 ```
+
+# Install pyodbc
+```sh
+pip install pyodbc
+```
+
+# Install SQLAlchemy
+```sh
+pip install SQLAlchemy
+```

@@ -1,6 +1,49 @@
+import os
 from flask import Flask, jsonify, request, render_template
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
+from dotenv import load_dotenv
+
+load_dotenv()  # os env (environment variable)
 
 app = Flask(__name__)
+# General pattern - mssql+pyodbc://<username>:<password>@<dsn_name>?driver=<driver_name>
+
+connection_string = os.environ.get("AZURE_DATABASE_URL")
+app.config["SQLALCHEMY_DATABASE_URI"] = connection_string
+
+db = SQLAlchemy(app)
+
+try:
+    with app.app_context():
+        # Use text() to explicitly declare your SQL command
+        result = db.session.execute(text("SELECT 1")).fetchall()
+        print("Connection successful:", result)
+except Exception as e:
+    print("Error connecting to the database:", e)
+
+
+# Model (SQLAlchemy) = Schema
+class Movie(db.Model):
+    __tablename__ = "movies"
+    id = db.Column(db.String(50), primary_key=True)
+    name = db.Column(db.String(100))
+    poster = db.Column(db.String(255))
+    rating = db.Column(db.Float)
+    summary = db.Column(db.String(500))
+    trailer = db.Column(db.String(255))
+
+    # JSON - Keys
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "poster": self.poster,
+            "rating": self.rating,
+            "summary": self.summary,
+            "trailer": self.trailer,
+        }
+
 
 # local
 movies = [
@@ -140,18 +183,24 @@ def profile():
 
 @app.route("/movie-list")
 def movie_list():
-    return render_template("movie-list.html", movies=movies)
+    movie_list = Movie.query.all()
+    data = [movie.to_dict() for movie in movie_list]
+    return render_template("movie-list.html", movies=data)
+
 
 @app.route("/movie-list/<id>")
 def display_specific_movie(id):
-    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+    filtered_movie = Movie.query.get(id)
     if filtered_movie is None:
         return "<h1>404 Movie Not Found</h2>"
-    return render_template("movie-detail.html", movie=filtered_movie)
+    data = filtered_movie.to_dict()
+    return render_template("movie-detail.html", movie=data)
+
 
 @app.route("/login", methods=["GET"])
 def forms_page():
     return render_template("forms.html")
+
 
 # @app.route("/dashboard1", methods=["GET"])
 # def dashboard1_page():
@@ -160,17 +209,20 @@ def forms_page():
 #     print("Dashboard page", username, password)
 #     return render_template("dashboard1.html",username=username)
 
+
 @app.route("/dashboard1", methods=["POST"])
 def dashboard1_page():
     username = request.form.get("username")
     password = request.form.get("password")
     print("Dashboard page", username, password)
-    return render_template("dashboard1.html",username=username)
+    return render_template("dashboard1.html", username=username)
+
 
 # Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list
 @app.route("/movies/add", methods=["GET"])
 def add_movie_form():
     return render_template("add_movie.html")
+
 
 @app.route("/movie-list.html", methods=["POST"])
 def movie_form_values():
@@ -180,42 +232,35 @@ def movie_form_values():
     summary = request.form.get("summary")
     trailer_url = request.form.get("trailer_url")
     id = str(int(max(movies, key=lambda x: int(x["id"]))["id"]) + 1)
-    ans = {'id': id, 'name': movie_name, 'rating': rating,'summary': summary,'trailer':trailer_url}
+    ans = {
+        "id": id,
+        "name": movie_name,
+        "rating": rating,
+        "summary": summary,
+        "trailer": trailer_url,
+    }
     movies.append(ans)
     print("Dashboard page", ans)
-    return render_template("movie-list.html",movies = movies)
-
+    return render_template("movie-list.html", movies=movies)
 
 
 # /movies --> JSON
 @app.get("/movies")
 def get_movies():
-    return jsonify(movies)
-
-
-# /movies/id
-# @app.get("/movies/<id>")
-# def get_specific_movies(id):
-#     ans = list(filter(lambda x: x["id"] == id, movies))
-#     return jsonify(ans[0])
-
-
-# @app.get("/movies/<id>")
-# def get_specific_movies(id):
-#     filtered_movie = list(filter(lambda x: x["id"] == id, movies))
-#     if len(filtered_movie) > 0:
-#         return jsonify(filtered_movie[0])
-#     else:
-#         return "Not found", 404
+    movie_list = Movie.query.all()  # Select * from movies
+    data = [
+        movie.to_dict() for movie in movie_list
+    ]  # Converting into list of dictionaries
+    return jsonify(data)
 
 
 # Generator expression
 @app.get("/movies/<id>")
-def get_specific_movies(id):
-    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+def get_specific_movie(id):
+    filtered_movie = Movie.query.get(id)
     if filtered_movie is None:
-        return {"message": "Movie Not found"}, 404
-    return jsonify(filtered_movie)
+        return jsonify({"message": "Movie Not found"}), 404
+    return jsonify(filtered_movie.to_dict())
 
 
 # request.json --> new_movie

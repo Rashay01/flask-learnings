@@ -8,10 +8,10 @@
 <body>
     <form class="login-form" action="{{url_for('movie_form_values')}}" method="POST">
         <input type="text" name="movie_name" placeholder="movie name">
-        <input type="text" name="poster_url" placeholder="poster URL">
+        <input type="url" name="poster_url" placeholder="poster URL">
         <input type="number" name="rating" placeholder="rating">
         <input type="text" name="summary" placeholder="summary">
-        <input type="text" name="trailer_url" placeholder="trailer URL">
+        <input type="url" name="trailer_url" placeholder="trailer URL">
         <button type="submit">Submit</button>
     </form>
 </body>

@@ -1,7 +1,10 @@
 {
     "cSpell.ignoreWords": [
+        "dotenv",
         "jsonify",
         "myenv",
+        "pyodbc",
+        "sqlalchemy",
         "venv"
     ]
 }
