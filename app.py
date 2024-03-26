@@ -142,13 +142,49 @@ def profile():
 def movie_list():
     return render_template("movie-list.html", movies=movies)
 
-
 @app.route("/movie-list/<id>")
 def display_specific_movie(id):
     filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
     if filtered_movie is None:
         return "<h1>404 Movie Not Found</h2>"
     return render_template("movie-detail.html", movie=filtered_movie)
+
+@app.route("/login", methods=["GET"])
+def forms_page():
+    return render_template("forms.html")
+
+# @app.route("/dashboard1", methods=["GET"])
+# def dashboard1_page():
+#     username = request.args.get("username")
+#     password = request.args.get("password")
+#     print("Dashboard page", username, password)
+#     return render_template("dashboard1.html",username=username)
+
+@app.route("/dashboard1", methods=["POST"])
+def dashboard1_page():
+    username = request.form.get("username")
+    password = request.form.get("password")
+    print("Dashboard page", username, password)
+    return render_template("dashboard1.html",username=username)
+
+# Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list
+@app.route("/movies/add", methods=["GET"])
+def add_movie_form():
+    return render_template("add_movie.html")
+
+@app.route("/movie-list.html", methods=["POST"])
+def movie_form_values():
+    movie_name = request.form.get("movie_name")
+    poster_url = request.form.get("poster_url")
+    rating = request.form.get("rating")
+    summary = request.form.get("summary")
+    trailer_url = request.form.get("trailer_url")
+    id = str(int(max(movies, key=lambda x: int(x["id"]))["id"]) + 1)
+    ans = {'id': id, 'name': movie_name, 'rating': rating,'summary': summary,'trailer':trailer_url}
+    movies.append(ans)
+    print("Dashboard page", ans)
+    return render_template("movie-list.html",movies = movies)
+
 
 
 # /movies --> JSON
