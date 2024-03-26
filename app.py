@@ -3,6 +3,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
+import uuid
 
 load_dotenv()  # os env (environment variable)
 
@@ -26,7 +27,7 @@ except Exception as e:
 # Model (SQLAlchemy) = Schema
 class Movie(db.Model):
     __tablename__ = "movies"
-    id = db.Column(db.String(50), primary_key=True)
+    id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     name = db.Column(db.String(100))
     poster = db.Column(db.String(255))
     rating = db.Column(db.Float)
@@ -268,12 +269,23 @@ def get_specific_movie(id):
 # 1 more than the Id
 @app.post("/movies")
 def add_movies():
-    new_movie = request.json
-    id = str(int(max(movies, key=lambda x: int(x["id"]))["id"]) + 1)
-    new_movie = {**new_movie, "id": id}
-    movies.append(new_movie)
-    result = {"message": "added successfully", "data": new_movie}
-    return jsonify(result), 201
+    data = request.json
+
+    # new_movie = Movie(
+    #     name=data["name"],
+    #     poster=data["poster"],
+    #     rating=data["rating"],
+    #     summary=data["summary"],
+    #     trailer=data["trailer"],
+    # )
+    new_movie = Movie(**data)
+    try:
+        db.session.add(new_movie)
+        db.session.commit()
+        result = {"message": "added successfully", "data": new_movie.to_dict()}
+        return jsonify(result), 201
+    except Exception as e:
+        return jsonify({"message": str(e)}), 500
 
 
 @app.delete("/movies/<id>")
