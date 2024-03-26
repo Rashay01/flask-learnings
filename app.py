@@ -276,53 +276,19 @@ def add_movies():
     return jsonify(result), 201
 
 
-# @app.delete("/movies/<id>")
-# def delete_movie(id):
-#     filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
-#     if filtered_movie is None:
-#         return "Movie Not found", 404
-#     movies = [movie for movie in movies if movie["id"] != id]
-#     return jsonify(filtered_movie)
-
-
-# @app.delete("/movies/<id>")
-# def delete_movie(id):
-#     filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
-#     movies.remove(filtered_movie)
-#     return jsonify(filtered_movie)
-
-
 @app.delete("/movies/<id>")
 def delete_movie(id):
-    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+    filtered_movie = Movie.query.get(id)
     if filtered_movie is None:
-        return {"message": "Movie Not found"}, 404
-    movies.remove(filtered_movie)
-    return jsonify(filtered_movie)
-
-
-# @app.delete("/movies/<id>")
-# def delete_movie(id):
-#     # Permission to modify the lexical scope variable | Reassigning is not allowed
-#     global movies
-#     filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
-#     if filtered_movie is None:
-#         return {"message": "Movie Not found"}, 404
-#     movies = [movie for movie in movies if movie["id"] != id]
-#     return jsonify(filtered_movie)
-
-
-# @app.put("/movies/<id>")
-# def update_movies(id):
-#     movie_update = request.json
-#     filtered_movie = next(
-#         (ind for ind in range(len(movies)) if movies[ind]["id"] == id), None
-#     )
-#     if filtered_movie is None:
-#         return {"message": "Movie Not found"}, 404
-#     movies[filtered_movie].update(movie_update)
-#     result = {"message": "updated successfully", "data": movies[filtered_movie]}
-#     return jsonify(result)
+        return jsonify({"message": "Movie Not found"}), 404
+    try:
+        data = filtered_movie.to_dict()
+        db.session.delete(filtered_movie)
+        db.session.commit()
+        return jsonify(data)
+    except Exception as e:
+        db.session.rollback()  # undo the commit
+        return {"message": str(e)}, 500
 
 
 @app.put("/movies/<id>")
