@@ -306,9 +306,22 @@ def delete_movie(id):
 @app.put("/movies/<id>")
 def update_movies(id):
     movie_update = request.json
-    filtered_movie = next((movie for movie in movies if movie["id"] == id), None)
+    filtered_movie = Movie.query.get(id)
     if filtered_movie is None:
         return jsonify({"message": "Movie Not found"}), 404
-    filtered_movie.update(movie_update)
-    result = {"message": "updated successfully", "data": filtered_movie}
-    return jsonify(result)
+    try:
+        for key, value in movie_update.items():
+            if hasattr(filtered_movie, key):
+                setattr(filtered_movie, key, value)
+
+        # filtered_movie.name = movie_update.get("name", filtered_movie.name)
+        # filtered_movie.rating = movie_update.get("rating", filtered_movie.rating)
+        # filtered_movie.poster = movie_update.get("poster", filtered_movie.poster)
+        # filtered_movie.summary = movie_update.get("summary", filtered_movie.summary)
+        # filtered_movie.trailer = movie_update.get("trailer", filtered_movie.trailer)
+        db.session.commit()
+        result = {"message": "updated successfully", "data": filtered_movie.to_dict()}
+        return jsonify(result)
+    except Exception as e:
+        db.session.rollback()
+        return {"message": str(e)}, 500
