@@ -1,0 +1,27 @@
+body {
+    margin: 0;
+    display: grid;
+    place-content: center;
+    min-height: 100vh;
+  }
+  .profile_img {
+    height: 200px;
+    aspect-ratio: 1/ 1;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .user-name {
+    font-weight: 700;
+    font-style: italic;
+  }
+  .hello {
+    font-family: sans-serif;
+    font-size: 28px;
+  }
+
+  .green-box{
+    background-color: teal;
+  }
+  .red-box{
+    background-color: crimson;
+  }

@@ -150,7 +150,7 @@ class User(db.Model):
     __tablename__ = "users"
     id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = db.Column(db.String(100))
-    password = db.Column(db.String(255))
+    password = db.Column(db.String(100))
 
     # JSON - Keys
     def to_dict(self):
@@ -185,6 +185,11 @@ def dashboard():
 @app.route("/profile")
 def profile():
     return render_template("profile.html", name=name, hobbies=hobbies)
+
+
+@app.route("/sample")
+def sample():
+    return render_template("sample.html")
 
 
 # Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list

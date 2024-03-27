@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
-        .login-form{
+        .register-form{
             display: grid;
             gap: 10px;
         }
     </style>
 </head>
 <body>
-    <form class="login-form" action="{{url_for('users.dashboard1_page')}}" method="POST">
+    <form class="register-form" action="{{url_for('users.sign_up_user')}}" method="POST">
         <input type="text" name="username" placeholder="username">
         <input type="text" name="password" placeholder="password">
         <button type="submit">Submit</button>

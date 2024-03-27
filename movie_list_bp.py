@@ -60,14 +60,25 @@ def movie_form_values():
         return "<h2>Error Occurred</h2>"
 
 
-@movies_list_bp.route("/update", methods=["GET"])
-def update_movie_form():
-    movie_list = Movie.query.all()
-    data = [movie.to_dict() for movie in movie_list]
-    return render_template("update-movie.html", movies=data)
+@movies_list_bp.route("/update/<id>", methods=["GET"])
+def update_movie_form(id):
+    movie_list = Movie.query.get(id)
+    return render_template("update-movie.html", movie=movie_list)
 
 
 @movies_list_bp.route("/updated", methods=["POST"])
 def update_movie_result():
-    movie_id = request.form.get("movie_id")
-    return f"<h2>{movie_id}</h2>"
+    filtered_movie = Movie.query.get(request.form.get("movie_id"))
+    if filtered_movie is None:
+        return "<h2>404 Movie not found</h2>"
+    filtered_movie.name = request.form.get("name")
+    filtered_movie.poster = request.form.get("poster")
+    filtered_movie.rating = request.form.get("rating")
+    filtered_movie.summary = request.form.get("summary")
+    filtered_movie.trailer = request.form.get("trailer")
+    try:
+        db.session.commit()
+        return f"<h2>{filtered_movie.name} updated successfully</h2>"
+    except Exception as e:
+        db.session.rollback()
+        return "<h2>Error Occurred</h2>"

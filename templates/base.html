@@ -1,45 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
-    <style>
-        body {
-            margin: 0;
-            display: grid;
-            place-content: center;
-            min-height: 100vh;
-        }
-        .profile_img{
-            height: 200px;
-            aspect-ratio: 1/ 1;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .user-name{
-            font-weight: 700;
-            font-style: italic;
-        }
-        .hello{
-            font-family: sans-serif;
-            font-size: 28px;
-        }
-    </style>
-</head>
-<body>
+    <link rel="stylesheet" href="{{url_for('static',filename='styles.css')}}"/>
+  </head>
+  <body>
     <nav>
-        <ul>
-            <li><a href="/profile">Profile</a></li>
-            <li><a href="/about">About</a></li>
-            <li><a href="/">Home</a></li>
-        </ul>
-        
+      <ul>
+        <li><a href="/profile">Profile</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/">Home</a></li>
+      </ul>
     </nav>
-    {% block body %}
-    {% endblock %}
-    
+    {% block body %} {% endblock %}
 
-    
-</body>
+    <section class="red-box">{% block redbox %} {% endblock %}</section>
+    <section class="green-box">{% block greenbox %} {% endblock %}</section>
+  </body>
 </html>

@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Document</title>
+    <style>
+        .update-form{
+            display: grid;
+            gap: 10px;
+        }
+    </style>
   </head>
   <body>
     <form
@@ -11,16 +17,12 @@
       action="{{url_for('movies_list.update_movie_result')}}"
       method="POST"
     >
-      <select name="movie_id" id="cars">
-        {% for movie in movies %}
-        <option value="{{movie.id}}">{{movie.name}}</option>
-        {% endfor %}
-      </select>
-      <input type="text" name="name" placeholder="{}" />
-      <input type="text" name="poster" placeholder="Poster URL" />
-      <input type="number" step="0.1" name="rating" placeholder="Rating" />
-      <textarea name="summary" placeholder="Summary"></textarea>
-      <input type="text" name="trailer" placeholder="Trailer URL" />
+      <input type="text" name="movie_id" value="{{movie.id}}" hidden/>
+      <input type="text" name="name" value="{{movie.name}}"/>
+      <input type="text" name="poster" placeholder="Poster URL" value="{{movie.poster}}"/>
+      <input type="number" step="0.1" name="rating" placeholder="Rating"  value="{{movie.rating}}"/>
+      <textarea name="summary" placeholder="Summary">{{movie.summary}}</textarea>
+      <input type="text" name="trailer" placeholder="Trailer URL" value="{{movie.trailer}}"/>
       <button type="submit">Update Movie</button>
     </form>
   </body>
