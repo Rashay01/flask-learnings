@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <form
+      class="update-form"
+      action="{{url_for('update_movie_result')}}"
+      method="POST"
+    >
+      <select name="movie_id" id="cars">
+        {% for movie in movies %}
+        <option value="{{movie.id}}">{{movie.name}}</option>
+        {% endfor %}
+      </select>
+      <input type="text" name="name" placeholder="{}" />
+      <input type="text" name="poster" placeholder="Poster URL" />
+      <input type="number" step="0.1" name="rating" placeholder="Rating" />
+      <textarea name="summary" placeholder="Summary"></textarea>
+      <input type="text" name="trailer" placeholder="Trailer URL" />
+      <button type="submit">Update Movie</button>
+    </form>
+  </body>
+</html>

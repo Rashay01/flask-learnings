@@ -243,26 +243,34 @@ def add_movie_form():
 
 @app.route("/movies/added", methods=["POST"])
 def movie_form_values():
-    movie_name = request.form.get("name")
-    poster_url = request.form.get("poster")
-    rating = request.form.get("rating")
-    summary = request.form.get("summary")
-    trailer_url = request.form.get("trailer")
-    movie = {
-        "name": movie_name,
-        "poster": poster_url,
-        "rating": rating,
-        "summary": summary,
-        "trailer": trailer_url,
+    data = {
+        "name": request.form.get("name"),
+        "poster": request.form.get("poster"),
+        "rating": request.form.get("rating"),
+        "summary": request.form.get("summary"),
+        "trailer": request.form.get("trailer"),
     }
     try:
-        new_movie = Movie(**movie)
+        new_movie = Movie(**data)
         db.session.add(new_movie)
         db.session.commit()
-        return f"<h2>{ans['name']} Added Successfully</h2>"
+        return f"<h2>{data['name']} Added Successfully</h2>"
     except Exception as e:
         db.session.rollback()
         return "<h2>Error Occurred</h2>"
+
+
+@app.route("/movies/update", methods=["GET"])
+def update_movie_form():
+    movie_list = Movie.query.all()
+    data = [movie.to_dict() for movie in movie_list]
+    return render_template("update-movie.html", movies=data)
+
+
+@app.route("/movies/updated", methods=["POST"])
+def update_movie_result():
+    movie_id = request.form.get("movie_id")
+    return f"<h2>{movie_id}</h2>"
 
 
 # /movies --> JSON
