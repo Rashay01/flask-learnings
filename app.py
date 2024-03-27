@@ -4,9 +4,12 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from dotenv import load_dotenv
 import uuid
+from about_bp import about_bp
+
 
 load_dotenv()  # os env (environment variable)
 
+# db = SQLAlchemy()
 app = Flask(__name__)
 # General pattern - mssql+pyodbc://<username>:<password>@<dsn_name>?driver=<driver_name>
 
@@ -14,6 +17,7 @@ connection_string = os.environ.get("AZURE_DATABASE_URL")
 app.config["SQLALCHEMY_DATABASE_URI"] = connection_string
 
 db = SQLAlchemy(app)
+# db.init_app(app)
 
 try:
     with app.app_context():
@@ -22,28 +26,6 @@ try:
         print("Connection successful:", result)
 except Exception as e:
     print("Error connecting to the database:", e)
-
-
-# Model (SQLAlchemy) = Schema
-class Movie(db.Model):
-    __tablename__ = "movies"
-    id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(100))
-    poster = db.Column(db.String(255))
-    rating = db.Column(db.Float)
-    summary = db.Column(db.String(500))
-    trailer = db.Column(db.String(255))
-
-    # JSON - Keys
-    def to_dict(self):
-        return {
-            "id": self.id,
-            "name": self.name,
-            "poster": self.poster,
-            "rating": self.rating,
-            "summary": self.summary,
-            "trailer": self.trailer,
-        }
 
 
 # local
@@ -138,38 +120,61 @@ movies = [
     },
 ]
 
-# jinja2 - templates
-users = [
-    {
-        "name": "Dhara",
-        "img": "https://i.pinimg.com/236x/db/b9/cb/dbb9cbe3b84da22c294f57cc7847977e.jpg",
-        "pro": True,
-    },
-    {
-        "name": "Arjun",
-        "img": "https://images.unsplash.com/photo-1618641986557-1ecd230959aa?q=80&w=1000&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
-        "pro": False,
-    },
-    {
-        "name": "John",
-        "img": "https://imgv3.fotor.com/images/blog-richtext-image/10-profile-picture-ideas-to-make-you-stand-out.jpg",
-        "pro": True,
-    },
-]
-
-
 name = "Caleb"
 hobbies = ["Gaming", "Reading", "Soccer", "Ballet", "Gyming"]
+
+
+# Model (SQLAlchemy) = Schema
+class Movie(db.Model):
+    __tablename__ = "movies"
+    id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
+    name = db.Column(db.String(100))
+    poster = db.Column(db.String(255))
+    rating = db.Column(db.Float)
+    summary = db.Column(db.String(500))
+    trailer = db.Column(db.String(255))
+
+    # JSON - Keys
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "poster": self.poster,
+            "rating": self.rating,
+            "summary": self.summary,
+            "trailer": self.trailer,
+        }
+
+
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.String(50), primary_key=True, default=lambda: str(uuid.uuid4()))
+    username = db.Column(db.String(100))
+    password = db.Column(db.String(255))
+
+    # JSON - Keys
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "username": self.username,
+            "password": self.password,
+        }
+
+
+from movies_bp import movies_bp
+from movie_list_bp import movies_list_bp
+from users_bp import users_bp
+
+# jinja2 - templates
+app.register_blueprint(about_bp, url_prefix="/about")
+app.register_blueprint(movies_bp, url_prefix="/movies")
+app.register_blueprint(movies_list_bp, url_prefix="/movies-list")
+app.register_blueprint(users_bp, url_prefix="/user")
 
 
 @app.route("/")
 def hello_world():
     return "<p>Super, Cool! 😁</p>"
-
-
-@app.route("/about")
-def about():
-    return render_template("about.html", users=users)
 
 
 @app.route("/dashboard")
@@ -182,174 +187,4 @@ def profile():
     return render_template("profile.html", name=name, hobbies=hobbies)
 
 
-@app.route("/movie-list")
-def movie_list():
-    movie_list = Movie.query.all()
-    data = [movie.to_dict() for movie in movie_list]
-    return render_template("movie-list.html", movies=data)
-
-
-@app.route("/movie-list/<id>")
-def display_specific_movie(id):
-    filtered_movie = Movie.query.get(id)
-    if filtered_movie is None:
-        return "<h1>404 Movie Not Found</h2>"
-    data = filtered_movie.to_dict()
-    return render_template("movie-detail.html", movie=data)
-
-
-@app.route("/movie-list/delete", methods=["POST"])  # HOF
-def delete_movie_by_id():
-    id = request.form.get("movie_id")
-    filtered_movie = Movie.query.get(id)
-    if filtered_movie is None:
-        return "<h2>404 Movie not found</h2>"
-    try:
-        data = filtered_movie.to_dict()
-        db.session.delete(filtered_movie)
-        db.session.commit()
-        return f"<h2>{data['name']} Deleted Successfully</h2>"
-    except Exception as e:
-        db.session.rollback()
-        return "<h2>Error Occurred</h2>"
-
-
-@app.route("/login", methods=["GET"])
-def forms_page():
-    return render_template("forms.html")
-
-
-# @app.route("/dashboard1", methods=["GET"])
-# def dashboard1_page():
-#     username = request.args.get("username")
-#     password = request.args.get("password")
-#     print("Dashboard page", username, password)
-#     return render_template("dashboard1.html",username=username)
-
-
-@app.route("/dashboard1", methods=["POST"])
-def dashboard1_page():
-    username = request.form.get("username")
-    password = request.form.get("password")
-    print("Dashboard page", username, password)
-    return render_template("dashboard1.html", username=username)
-
-
 # Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list
-@app.route("/movies/add", methods=["GET"])
-def add_movie_form():
-    return render_template("add_movie.html")
-
-
-@app.route("/movies/added", methods=["POST"])
-def movie_form_values():
-    data = {
-        "name": request.form.get("name"),
-        "poster": request.form.get("poster"),
-        "rating": request.form.get("rating"),
-        "summary": request.form.get("summary"),
-        "trailer": request.form.get("trailer"),
-    }
-    try:
-        new_movie = Movie(**data)
-        db.session.add(new_movie)
-        db.session.commit()
-        return f"<h2>{data['name']} Added Successfully</h2>"
-    except Exception as e:
-        db.session.rollback()
-        return "<h2>Error Occurred</h2>"
-
-
-@app.route("/movies/update", methods=["GET"])
-def update_movie_form():
-    movie_list = Movie.query.all()
-    data = [movie.to_dict() for movie in movie_list]
-    return render_template("update-movie.html", movies=data)
-
-
-@app.route("/movies/updated", methods=["POST"])
-def update_movie_result():
-    movie_id = request.form.get("movie_id")
-    return f"<h2>{movie_id}</h2>"
-
-
-# /movies --> JSON
-@app.get("/movies")
-def get_movies():
-    movie_list = Movie.query.all()  # Select * from movies
-    data = [
-        movie.to_dict() for movie in movie_list
-    ]  # Converting into list of dictionaries
-    return jsonify(data)
-
-
-# Generator expression
-@app.get("/movies/<id>")
-def get_specific_movie(id):
-    filtered_movie = Movie.query.get(id)
-    if filtered_movie is None:
-        return jsonify({"message": "Movie Not found"}), 404
-    return jsonify(filtered_movie.to_dict())
-
-
-# request.json --> new_movie
-# print(movie) --> print in the console log / terminal
-# 1 more than the Id
-@app.post("/movies")
-def add_movies():
-    data = request.json
-
-    # new_movie = Movie(
-    #     name=data["name"],
-    #     poster=data["poster"],
-    #     rating=data["rating"],
-    #     summary=data["summary"],
-    #     trailer=data["trailer"],
-    # )
-    new_movie = Movie(**data)
-    try:
-        db.session.add(new_movie)
-        db.session.commit()
-        result = {"message": "added successfully", "data": new_movie.to_dict()}
-        return jsonify(result), 201
-    except Exception as e:
-        return jsonify({"message": str(e)}), 500
-
-
-@app.delete("/movies/<id>")
-def delete_movie(id):
-    filtered_movie = Movie.query.get(id)
-    if filtered_movie is None:
-        return jsonify({"message": "Movie Not found"}), 404
-    try:
-        data = filtered_movie.to_dict()
-        db.session.delete(filtered_movie)
-        db.session.commit()
-        return jsonify(data)
-    except Exception as e:
-        db.session.rollback()  # undo the commit
-        return {"message": str(e)}, 500
-
-
-@app.put("/movies/<id>")
-def update_movies(id):
-    movie_update = request.json
-    filtered_movie = Movie.query.get(id)
-    if filtered_movie is None:
-        return jsonify({"message": "Movie Not found"}), 404
-    try:
-        for key, value in movie_update.items():
-            if hasattr(filtered_movie, key):
-                setattr(filtered_movie, key, value)
-
-        # filtered_movie.name = movie_update.get("name", filtered_movie.name)
-        # filtered_movie.rating = movie_update.get("rating", filtered_movie.rating)
-        # filtered_movie.poster = movie_update.get("poster", filtered_movie.poster)
-        # filtered_movie.summary = movie_update.get("summary", filtered_movie.summary)
-        # filtered_movie.trailer = movie_update.get("trailer", filtered_movie.trailer)
-        db.session.commit()
-        result = {"message": "updated successfully", "data": filtered_movie.to_dict()}
-        return jsonify(result)
-    except Exception as e:
-        db.session.rollback()
-        return {"message": str(e)}, 500
