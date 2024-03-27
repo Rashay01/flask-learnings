@@ -198,6 +198,22 @@ def display_specific_movie(id):
     return render_template("movie-detail.html", movie=data)
 
 
+@app.route("/movie-list/delete", methods=["POST"])  # HOF
+def delete_movie_by_id():
+    id = request.form.get("movie_id")
+    filtered_movie = Movie.query.get(id)
+    if filtered_movie is None:
+        return "<h2>404 Movie not found</h2>"
+    try:
+        data = filtered_movie.to_dict()
+        db.session.delete(filtered_movie)
+        db.session.commit()
+        return f"<h2>{data['name']} Deleted Successfully</h2>"
+    except Exception as e:
+        db.session.rollback()
+        return "<h2>Error Occurred</h2>"
+
+
 @app.route("/login", methods=["GET"])
 def forms_page():
     return render_template("forms.html")
@@ -225,24 +241,28 @@ def add_movie_form():
     return render_template("add_movie.html")
 
 
-@app.route("/movie-list.html", methods=["POST"])
+@app.route("/movies/added", methods=["POST"])
 def movie_form_values():
-    movie_name = request.form.get("movie_name")
-    poster_url = request.form.get("poster_url")
+    movie_name = request.form.get("name")
+    poster_url = request.form.get("poster")
     rating = request.form.get("rating")
     summary = request.form.get("summary")
-    trailer_url = request.form.get("trailer_url")
-    id = str(int(max(movies, key=lambda x: int(x["id"]))["id"]) + 1)
-    ans = {
-        "id": id,
+    trailer_url = request.form.get("trailer")
+    movie = {
         "name": movie_name,
+        "poster": poster_url,
         "rating": rating,
         "summary": summary,
         "trailer": trailer_url,
     }
-    movies.append(ans)
-    print("Dashboard page", ans)
-    return render_template("movie-list.html", movies=movies)
+    try:
+        new_movie = Movie(**movie)
+        db.session.add(new_movie)
+        db.session.commit()
+        return f"<h2>{ans['name']} Added Successfully</h2>"
+    except Exception as e:
+        db.session.rollback()
+        return "<h2>Error Occurred</h2>"
 
 
 # /movies --> JSON
