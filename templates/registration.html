@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <h1>Registration</h1>
+    <form action="" method="POST">
+        <!-- hidden input field -->
+        {{form.hidden_tag()}}
+      {{form.username.label}}: {{form.username(placeholder="username")}} <br />
+      {{form.password.label}}: {{form.password()}} <br />
+      {{form.submit}}<br />
+    </form>
+  </body>
+</html>

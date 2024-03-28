@@ -35,3 +35,8 @@ base html
     <footer></footer>
 <html>
 ```
+
+## Validation
+- junk data 
+- improves user experience to guide them in the direction in what they should do 
+- 

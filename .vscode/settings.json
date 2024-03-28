@@ -5,6 +5,7 @@
         "myenv",
         "pyodbc",
         "sqlalchemy",
-        "venv"
+        "venv",
+        "wtforms"
     ]
 }

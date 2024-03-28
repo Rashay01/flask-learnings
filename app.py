@@ -5,12 +5,14 @@ from sqlalchemy.sql import text
 from dotenv import load_dotenv
 import uuid
 from about_bp import about_bp
+from flask_wtf import FlaskForm
 
 
 load_dotenv()  # os env (environment variable)
 
 # db = SQLAlchemy()
 app = Flask(__name__)
+app.config["SECRET_KEY"] = os.environ.get("FORM_SECRET_KEY")
 # General pattern - mssql+pyodbc://<username>:<password>@<dsn_name>?driver=<driver_name>
 
 connection_string = os.environ.get("AZURE_DATABASE_URL")
@@ -193,3 +195,40 @@ def sample():
 
 
 # Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length
+
+
+class RegistrationForm(FlaskForm):
+    username = StringField("Username", validators=[InputRequired(), Length(min=6)])
+    password = PasswordField(
+        "Password", validators=[InputRequired(), Length(min=8, max=12)]
+    )
+    submit = SubmitField("Sign Up")
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register_page():
+    form = RegistrationForm()
+    data = {"username": form.username.data, "password": form.password.data}
+    all_users = User.query.all()
+    ans = [user.to_dict() for user in all_users]
+    found_user = next(
+        (user for user in ans if (user["username"] == data["username"])),
+        None,
+    )
+    print(form.username.data, form.password.data)
+    if form.validate_on_submit():
+        if found_user:
+            return "<h2>Username already exists</h2>"
+        new_user = User(**data)
+
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+            return f"<h2>{data['username']} has been registered</h2>"
+        except Exception as e:
+            db.session.rollback()
+            return "<h2>Error Occurred</h2>"
+
+    return render_template("registration.html", form=form)
