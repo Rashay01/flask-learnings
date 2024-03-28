@@ -5,9 +5,7 @@ from sqlalchemy.sql import text
 from dotenv import load_dotenv
 import uuid
 from about_bp import about_bp
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, ValidationError
-from wtforms.validators import InputRequired, Length
+
 
 load_dotenv()  # os env (environment variable)
 
@@ -172,13 +170,13 @@ class User(db.Model):
 
 from movies_bp import movies_bp
 from movie_list_bp import movies_list_bp
-from users_bp import users_bp
+from user_bp import user_bp
 
 # jinja2 - templates
 app.register_blueprint(about_bp, url_prefix="/about")
 app.register_blueprint(movies_bp, url_prefix="/movies")
 app.register_blueprint(movies_list_bp, url_prefix="/movies-list")
-app.register_blueprint(users_bp, url_prefix="/user")
+app.register_blueprint(user_bp, url_prefix="/user")
 
 
 @app.route("/")
@@ -202,76 +200,6 @@ def sample():
 
 
 # Task - /movies/add -> Add movie form (5 fields) -> Submit -> /movies-list
-
-
-class RegistrationForm(FlaskForm):
-    username = StringField("Username", validators=[InputRequired(), Length(min=6)])
-    password = PasswordField(
-        "Password", validators=[InputRequired(), Length(min=8, max=12)]
-    )
-    submit = SubmitField("Sign Up")
-
-    # def validate <field name>
-    def validate_username(self, field):
-        # WTF that there is an error
-        found_user = User.query.filter_by(username=field.data).first()
-        if found_user:
-            raise ValidationError("Username taken")
-
-
-@app.route("/register", methods=["GET", "POST"])
-def register_page():
-    form = RegistrationForm()
-
-    if form.validate_on_submit():
-        data = {"username": form.username.data, "password": form.password.data}
-        new_user = User(**data)
-
-        try:
-            db.session.add(new_user)
-            db.session.commit()
-            return f"<h2>{data['username']} has been registered</h2>"
-        except Exception as e:
-            db.session.rollback()
-            return "<h2>Error Occurred</h2>"
-
-    return render_template("registration.html", form=form)
-
-
-class LoginForm(FlaskForm):
-    username = StringField("Username", validators=[InputRequired(), Length(min=6)])
-    password = PasswordField(
-        "Password", validators=[InputRequired(), Length(min=8, max=12)]
-    )
-    submit = SubmitField("Login")
-
-    def validate_password(self, field):
-        found_user = User.query.filter_by(
-            username=field.data, password=self.password.data
-        ).first()
-        if found_user is None:
-            raise ValidationError("Invalid Credentials")
-
-    # def validate_password(self, field):
-    #     print(field.data)
-    #     found_user = User.query.filter_by(
-    #         username=self.username.data, password=field.data
-    #     ).first()
-    #     print(found_user)
-    #     # if found_user is None:
-    #     raise ValidationError("Invalid Credentials")
-
-    #  found_user = User.query.filter_by(username=field.data, password = self.password.data).first()
-    #  if found_user is None:
-    #      raise ValidationError("Invalid Credentials")
-
-
-@app.route("/login", methods=["GET", "POST"])
-def forms_page():
-    form = LoginForm()
-    if form.validate_on_submit():
-        return render_template("dashboard1.html", username=form.username.data)
-    return render_template("forms.html", form=form)
 
 
 # @app.route("/dashboard1", methods=["POST"])
