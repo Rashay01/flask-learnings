@@ -10,6 +10,11 @@
     <form action="" method="POST">
         <!-- hidden input field -->
         {{form.hidden_tag()}}
+        {% if form.username.errors %}
+        {% for error in form.username.errors %}
+        <div style="color:red">{{error}}</div>
+        {% endfor %}
+        {% endif %}
       {{form.username.label}}: {{form.username(placeholder="username")}} <br />
       {{form.password.label}}: {{form.password()}} <br />
       {{form.submit}}<br />

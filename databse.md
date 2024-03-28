@@ -40,3 +40,8 @@ base html
 - junk data 
 - improves user experience to guide them in the direction in what they should do 
 - 
+
+
+https://docs.sqlalchemy.org/en/14/orm/query.html#sqlalchemy.orm.Query.filter_by
+
+https://docs.sqlalchemy.org/en/20/orm/quickstart.html
